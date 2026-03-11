@@ -1,0 +1,15 @@
+select 
+  ticker,
+  max(case when rnk_high=1 then TO_CHAR(date, 'Mon-YYYY') end) as highest_mth,
+  max(case when rnk_high=1 then open end) as highest_open,
+  min(case when rnk_low=1 then TO_CHAR(date, 'Mon-YYYY') end) as lowest_mth,
+  min(case when rnk_low=1 then open end) as lowest_open
+from(
+select 
+  ticker,
+  date,
+  open,
+  row_number() over(partition by ticker order by open DESC, date desc) rnk_high,
+  row_number() over(partition by ticker order by open, date ) rnk_low
+from stock_prices) t
+group by t.ticker
